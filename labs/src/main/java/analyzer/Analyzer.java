@@ -1,13 +1,12 @@
 package analyzer;
 
+import reflection.Reflection;
 import fillers.FillerAnnotation;
 import fillers.Fillers;
-import org.reflections.Reflections;
 import sorters.abstractsorters.AbstractSorter;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Random;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * @author Burba
@@ -37,56 +36,34 @@ public class Analyzer {
 
     /**
      * <p>
-     *     Uses <b>reflection</b> to find all methods in {@link Fillers} class, that are marked by
-     *     {@link FillerAnnotation} and uses <i>org.reflections</i>
-     *     library to find all classes extending {@link AbstractSorter}.
+     *     Uses methods from {@link Reflection} class to find all methods in {@link Fillers} class, that are marked by
+     *     {@link FillerAnnotation} and find all classes extending {@link AbstractSorter}.
      * </p>
      *
      * <p>
-     *     All founded fillers generate arrays that are further sorted by every sorting class, which is not abstract.
      *     The method uses {@link #getSortDuration} method to calculate the duration of sort.
      * </p>
-     * <br>
-     * @see <a href="https://github.com/ronmamo/reflections">org.reflections</a>
      */
     public void analyze() {
 
-        int size;
         int[] array;
-        int modifier;
+        Reflection reflection = new Reflection();
+
+        ArrayList<Method> fillerMethods = reflection.getFillers();
+        ArrayList<AbstractSorter> sorters = reflection.getSorters();
 
         long sortDuration;
 
-        Random random = new Random();
-
-        Class fillersClass = Fillers.class;
-        Method[] fillerMethods = fillersClass.getMethods();
-
-        Reflections reflections = new Reflections("sorters");
-        Set<Class<? extends AbstractSorter>> sortClasses = reflections.getSubTypesOf(AbstractSorter.class);
-
-        for (int i = 0; i <= 3; i++) {
-
-            size = random.nextInt(91) + 10;
-
-            for (Method fillerMethod : fillerMethods) {
-                FillerAnnotation fillerAnnotation = fillerMethod.getAnnotation(FillerAnnotation.class);
-                if (fillerAnnotation != null) {
-
-                    for (Class<? extends AbstractSorter> sortClass : sortClasses) {
-
-                        modifier = sortClass.getModifiers();
-
-                        if (!Modifier.isAbstract(modifier)) {
-                            try {
-                                array = (int[]) fillerMethod.invoke(fillersClass, size);
-                                AbstractSorter sorter = sortClass.newInstance();
-                                sortDuration = getSortDuration(sorter, array);
-                            } catch (Exception exc) {
-                                exc.printStackTrace();
-                            }
-                        }
-                    }
+        for(Method fillerMethod : fillerMethods){
+            for(int size = 10; size <= 60; size *= 2){
+                for(AbstractSorter sorter : sorters){
+                    array = reflection.invokeFiller(fillerMethod, size);
+                    System.out.println(fillerMethod.getName());
+                    System.out.println(sorter.getClass().getName());
+                    System.out.println(Arrays.toString(array));
+                    sortDuration = getSortDuration(sorter, array);
+                    System.out.println(sortDuration);
+                    System.out.println(Arrays.toString(array));
                 }
             }
         }
