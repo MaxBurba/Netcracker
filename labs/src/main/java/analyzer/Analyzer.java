@@ -1,12 +1,12 @@
 package analyzer;
 
+import com.google.common.collect.*;
 import reflection.Reflection;
 import fillers.FillerAnnotation;
 import fillers.Fillers;
 import sorters.abstractsorters.AbstractSorter;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * @author Burba
@@ -16,6 +16,8 @@ import java.util.Arrays;
  * </p>
  */
 public class Analyzer {
+
+    private static final int ITERATIONS = 12;
 
     /**
      * <p>
@@ -36,36 +38,44 @@ public class Analyzer {
 
     /**
      * <p>
-     *     Uses methods from {@link Reflection} class to find all methods in {@link Fillers} class, that are marked by
-     *     {@link FillerAnnotation} and find all classes extending {@link AbstractSorter}.
+     *     Uses methods from {@link Reflection} class to find all methods in {@link Fillers} class, that
+     *     are marked with {@link FillerAnnotation} and find all classes extending {@link AbstractSorter}.
      * </p>
      *
      * <p>
      *     The method uses {@link #getSortDuration} method to calculate the duration of sort.
+     *     All the found data, such as names of sorters, numbers of elements, for which
+     *     those sorters act, and durations of every sort are placed to the Table. Formed Tables serve
+     *     as V in the Map with appropriate {@link Fillers} methods serving as K.
      * </p>
+     * @return Map with Fillers serving as key and Table as value for the key.
      */
-    public void analyze() {
+    public Map<String, Table<String, Integer, Long>> analyze() {
 
         int[] array;
+        long sortDuration;
+
         Reflection reflection = new Reflection();
 
         ArrayList<Method> fillerMethods = reflection.getFillers();
         ArrayList<AbstractSorter> sorters = reflection.getSorters();
 
-        long sortDuration;
+        Map<String, Table<String, Integer, Long>> fillerMap = new HashMap<>();
 
-        for(Method fillerMethod : fillerMethods){
-            for(int size = 10; size <= 60; size *= 2){
-                for(AbstractSorter sorter : sorters){
+        for (Method fillerMethod : fillerMethods) {
+            Table<String, Integer, Long> table = HashBasedTable.create();
+
+            for (int i = 0, size = 10; i < ITERATIONS; i++, size *= 2) {
+                for (AbstractSorter sorter : sorters) {
+
                     array = reflection.invokeFiller(fillerMethod, size);
-                    System.out.println(fillerMethod.getName());
-                    System.out.println(sorter.getClass().getName());
-                    System.out.println(Arrays.toString(array));
                     sortDuration = getSortDuration(sorter, array);
-                    System.out.println(sortDuration);
-                    System.out.println(Arrays.toString(array));
+
+                    table.put(sorter.getClass().getSimpleName(), size, sortDuration);
                 }
             }
+            fillerMap.put(fillerMethod.getName(), table);
         }
+        return fillerMap;
     }
 }
