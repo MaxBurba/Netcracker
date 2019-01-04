@@ -3,9 +3,13 @@ package output;
 import analyzer.Analyzer;
 import com.google.common.collect.Table;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xddf.usermodel.chart.AxisCrosses;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.LegendPosition;
+import org.apache.poi.xssf.usermodel.*;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
@@ -45,6 +49,7 @@ public class Output {
                 }
                 colNum = 0;
             }
+            initChart(sheet, sizeKeys.size(), sortNames.size());
         }
         try {
             FileOutputStream outputStream = new FileOutputStream(FILE_NAME);
@@ -76,5 +81,39 @@ public class Output {
             cell.setCellValue(sortName);
             cell.setCellStyle(style);
         }
+    }
+
+    private void initChart(XSSFSheet sheet, int rowNum, int colNum){
+
+        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, rowNum + 2, colNum + 1, rowNum * 3);
+
+        XSSFChart chart = drawing.createChart(anchor);
+        XDDFChartLegend legend = chart.getOrAddLegend();
+        legend.setPosition(LegendPosition.TOP_RIGHT);
+
+        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+        bottomAxis.setTitle("Size");
+        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+        leftAxis.setTitle("Sort Duration");
+        leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+
+        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+
+        XDDFDataSource<Double> xs = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum, 0, 0));
+
+        for(int i = 1; i <= colNum; i++){
+            XDDFNumericalDataSource<Double> ys = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum, i, i));
+            XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(xs, ys);
+
+            XSSFRow row = sheet.getRow(0);
+            String sortName = row.getCell(i).getStringCellValue();
+
+            series.setTitle(sortName, null);
+            series.setSmooth(false);
+            series.setMarkerSize((short) 6);
+        }
+        //chart.displayBlanksAs(DisplayBlanks.GAP);
+        chart.plot(data);
     }
 }
