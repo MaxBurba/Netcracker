@@ -1,6 +1,6 @@
 package sorters;
 
-import sorters.abstractsorters.AbstractSorter;
+import sorters.abstractsorters.BubbleSorter;
 
 /**
  * @author Burba
@@ -9,7 +9,7 @@ import sorters.abstractsorters.AbstractSorter;
  *     Contains methods that sorts array via Quick Sort.
  * </p>
  */
-public class QuickSort extends AbstractSorter {
+public class QuickSort extends BubbleSorter {
 
     /**
      * Calls {@link #quickSort(int, int, int[])} method, passes to it
@@ -62,17 +62,5 @@ public class QuickSort extends AbstractSorter {
             quickSort(low, j, array);
         if (i < high)
             quickSort(i, high, array);
-    }
-
-    /**
-     * Swaps to elements by their indexes.
-     * @param array array in which two elements are needed to be swapped.
-     * @param i first index of value to swap.
-     * @param j second index of value to swap.
-     */
-    private void swap(int[] array, int i, int j) {
-        int temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
     }
 }

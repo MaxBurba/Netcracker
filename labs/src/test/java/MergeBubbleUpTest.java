@@ -8,7 +8,6 @@ import static org.junit.Assert.assertArrayEquals;
 public class MergeBubbleUpTest {
 
     private int[] array;
-    private int[] mergeArray = new int[10];
     private MergeBubbleUp mergeBubbleUp = new MergeBubbleUp();
 
     @Before
@@ -39,14 +38,4 @@ public class MergeBubbleUpTest {
         assertArrayEquals(arrayRef, array);
     }
 
-    @Test
-    public void testMerge() {
-        int[] arrayRef = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        int[] leftArray = {0, 1, 2, 3, 4};
-        int[] rightArray = {5, 6, 7, 8, 9};
-
-        mergeBubbleUp.mergeArrays(leftArray, rightArray, 5, 5, mergeArray);
-
-        assertArrayEquals(arrayRef, mergeArray);
-    }
 }

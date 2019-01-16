@@ -37,14 +37,4 @@ public class BubbleSortUpTest {
 
         assertArrayEquals(arrayRef, array);
     }
-
-    @Test
-    public void testSwap(){
-        int[] arrayRef = {0, 1, 2, 3, 4, 5};
-        int[] array = {0, 2, 1, 3, 4, 5};
-
-        bubbleSortUp.swap(array, 2);
-
-        assertArrayEquals(arrayRef, array);
-    }
 }
