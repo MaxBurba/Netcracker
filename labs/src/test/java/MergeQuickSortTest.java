@@ -8,7 +8,6 @@ import static org.junit.Assert.assertArrayEquals;
 public class MergeQuickSortTest {
 
     private int[] array;
-    private int[] mergeArray = new int[10];
     private MergeQuickSort mergeQuickSort = new MergeQuickSort();
 
     @Before
@@ -37,16 +36,5 @@ public class MergeQuickSortTest {
         mergeQuickSort.sort(array);
 
         assertArrayEquals(arrayRef, array);
-    }
-
-    @Test
-    public void testMerge(){
-        int[] arrayRef = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        int[] leftArray = {0, 1, 2, 3, 4};
-        int[] rightArray = {5, 6, 7, 8, 9};
-
-        mergeQuickSort.mergeArrays(leftArray, rightArray, 5, 5, mergeArray);
-
-        assertArrayEquals(arrayRef, mergeArray);
     }
 }
